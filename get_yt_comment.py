@@ -3,7 +3,6 @@ import json
 from csv import writer
 from googleapiclient.discovery import build
 import pandas as pd
-import pickle
 import urllib.request
 import urllib
 
@@ -13,8 +12,6 @@ videoId = "a2y4_eOOn_Y"  # video of interest: sleeping position
 channelId = "UC6_hQ4uWg9amkSo-5tYfThA"  # channel of interet: Tony C
 
 # build service to call youtube API
-
-
 def build_service(filename):
     with open(filename) as f:
         key = f.readline()
@@ -23,8 +20,6 @@ def build_service(filename):
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, developerKey=key)
 
 # config function parameters for required variables to pass to service
-
-
 def get_comments(part="snippet",
                  maxResults=100,
                  textFormat="plainText",
@@ -50,7 +45,6 @@ def get_comments(part="snippet",
     while response:  # this loop continues to run till maxing out your quota
 
         for item in response["items"]:
-            # print("items: ", response["items"])
             # index item for desired data features
             comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
             comment_id = item['snippet']['topLevelComment']['id']
@@ -62,7 +56,7 @@ def get_comments(part="snippet",
             vidId = item['snippet']['topLevelComment']['snippet']['videoId']
             vidTitle = get_vid_title(vidId)
 
-            # 6 append to lists
+            # append to lists
             comments.append(comment)
             commentsId.append(comment_id)
             repliesCount.append(reply_count)
@@ -72,6 +66,7 @@ def get_comments(part="snippet",
             dates.append(date)
             vidIds.append(vidId)
             vidTitles.append(vidTitle)
+            
         try:
             if "nextPageToken" in response:
                 response = service.commentThreads().list(
@@ -87,9 +82,9 @@ def get_comments(part="snippet",
                 break
         except:
             break
-        print(len(comments))
+        
+        
     # return our data of interest
-
     return {
         "comment": comments,
         "commet_id": commentsId,
@@ -102,7 +97,6 @@ def get_comments(part="snippet",
         "vid_title": vidTitles
     }
 
-
 def get_vid_title(vidid):
     params = {"format": "json",
               "url": "https://www.youtube.com/watch?v=%s" % vidid}
@@ -113,9 +107,7 @@ def get_vid_title(vidid):
     with urllib.request.urlopen(url) as response:
         response_text = response.read()
         data = json.loads(response_text.decode())
-        print(data["title"])
         return data["title"]
-
 
 if __name__ == "__main__":
     new_comments = get_comments()
